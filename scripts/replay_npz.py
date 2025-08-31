@@ -30,7 +30,7 @@ simulation_app = app_launcher.app
 """Rest everything follows."""
 
 import isaaclab.sim as sim_utils
-from isaaclab.assets import Articulation, ArticulationCfg, AssetBaseCfg
+from isaaclab.assets import Articulation, ArticulationCfg, AssetBaseCfg,  RigidObjectCfg
 from isaaclab.scene import InteractiveScene, InteractiveSceneCfg
 from isaaclab.sim import SimulationContext
 from isaaclab.utils import configclass
@@ -57,6 +57,19 @@ class ReplayMotionsSceneCfg(InteractiveSceneCfg):
         ),
     )
 
+    # 障碍物
+    obstacle_box = AssetBaseCfg(
+    prim_path="/World/Obstacles/box_01",
+    spawn=sim_utils.CuboidCfg(
+        size=(0.6, 1, 0.4),
+        rigid_props=sim_utils.RigidBodyPropertiesCfg(kinematic_enabled=True),
+        collision_props=sim_utils.CollisionPropertiesCfg(),
+    ),
+    init_state=AssetBaseCfg.InitialStateCfg(   # ← 关键：用 AssetBaseCfg 自带的 InitialStateCfg
+        pos=(-1.5, -0.5, 0.20),
+        rot=(1.0, 0.0, 0.0, 0.0),
+        ),
+    )
     # articulation
     robot: ArticulationCfg = G1_CYLINDER_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 

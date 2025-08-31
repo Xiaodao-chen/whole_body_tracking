@@ -99,12 +99,12 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
             print(f"[INFO]: Using motion file from CLI: {args_cli.motion_file}")
             env_cfg.commands.motion.motion_file = args_cli.motion_file
 
-        art = next((a for a in wandb_run.used_artifacts() if a.type == "motions"), None)
-        if art is None:
-            print("[WARN] No model artifact found in the run.")
-        else:
-            env_cfg.commands.motion.motion_file = str(pathlib.Path(art.download()) / "motion.npz")
-
+        # art = next((a for a in wandb_run.used_artifacts() if a.type == "motions"), None)
+        # if art is None:
+        #     print("[WARN] No model artifact found in the run.")
+        # else:
+            # env_cfg.commands.motion.motion_file = str(pathlib.Path(art.download()) / "motion.npz")
+        
     else:
         print(f"[INFO] Loading experiment from directory: {log_root_path}")
         resume_path = get_checkpoint_path(log_root_path, agent_cfg.load_run, agent_cfg.load_checkpoint)
