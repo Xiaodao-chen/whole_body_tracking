@@ -36,6 +36,69 @@ VELOCITY_RANGE = {
     "yaw": (-0.78, 0.78),
 }
 
+
+@configclass
+class SpeedParkourSceneCfg(InteractiveSceneCfg):
+    """Configuration for a cat-parkour scene."""
+
+    # ground terrain
+    terrain = TerrainImporterCfg(
+        prim_path="/World/ground",
+        terrain_type="plane",
+        collision_group=-1,
+        physics_material=sim_utils.RigidBodyMaterialCfg(
+            friction_combine_mode="multiply",
+            restitution_combine_mode="multiply",
+            static_friction=1.0,
+            dynamic_friction=1.0,
+        ),
+        visual_material=sim_utils.MdlFileCfg(
+            mdl_path="{NVIDIA_NUCLEUS_DIR}/Materials/Base/Architecture/Shingles_01.mdl",
+            project_uvw=True,
+        ),
+    )
+    # robots
+    robot: ArticulationCfg = MISSING
+    # lights
+    light = AssetBaseCfg(
+        prim_path="/World/light",
+        spawn=sim_utils.DistantLightCfg(color=(0.75, 0.75, 0.75), intensity=3000.0),
+    )
+    sky_light = AssetBaseCfg(
+        prim_path="/World/skyLight",
+        spawn=sim_utils.DomeLightCfg(color=(0.13, 0.13, 0.13), intensity=1000.0),
+    )
+    contact_forces = ContactSensorCfg(
+        prim_path="{ENV_REGEX_NS}/Robot/.*", history_length=3, track_air_time=True, force_threshold=10.0, debug_vis=True
+    )
+    
+
+    obstacle_proto: RigidObjectCfg = RigidObjectCfg(
+        prim_path="/World/envs/env_.*/Object_A",       # 注意加 {ENV_REGEX_NS}，每个 env 一份
+        spawn=sim_utils.CuboidCfg(
+            size=(0.6, 2, 0.4),
+            rigid_props=sim_utils.RigidBodyPropertiesCfg(
+                kinematic_enabled=True,   # 运动学体：不被撞动，但能产生接触力
+                disable_gravity=True,     # 不受重力
+                max_depenetration_velocity=1.0
+            ),
+            mass_props=sim_utils.MassPropertiesCfg(mass=10.0),
+            collision_props=sim_utils.CollisionPropertiesCfg(),
+            physics_material=sim_utils.RigidBodyMaterialCfg(     # 摩擦/弹性
+                static_friction=1.0,
+                dynamic_friction=1.0,
+                friction_combine_mode="multiply",
+                restitution_combine_mode="multiply",
+            ),
+        ),
+        init_state=RigidObjectCfg.InitialStateCfg(
+            pos=(-2.0, -0.5, 0.20),  # 初始放地面上（z=半高）
+            rot=(1.0, 0.0, 0.0, 0.0),
+            lin_vel=(0.0, 0.0, 0.0),
+            ang_vel=(0.0, 0.0, 0.0),
+        ),
+    )
+
 @configclass
 class CatParkourSceneCfg(InteractiveSceneCfg):
     """Configuration for a cat-parkour scene."""
@@ -350,6 +413,38 @@ class CurriculumCfg:
 ##
 # Environment configuration
 ##
+
+@configclass
+class SpeedParkourEnvCfg(ManagerBasedRLEnvCfg):
+    """Configuration for the locomotion cat-parkour environment."""
+
+    # Scene settings
+    scene: SpeedParkourSceneCfg = SpeedParkourSceneCfg(num_envs=4096, env_spacing=2.5) 
+    # Basic settings
+    observations: ObservationsCfg = ObservationsCfg()
+    actions: ActionsCfg = ActionsCfg()
+    commands: CommandsCfg = CommandsCfg()
+    # MDP settings
+    rewards: RewardsCfg = RewardsCfg()
+    terminations: TerminationsCfg = TerminationsCfg()
+    events: EventCfg = EventCfg()
+    curriculum: CurriculumCfg = CurriculumCfg()
+
+    def __post_init__(self):
+        """Post initialization."""
+        # general settings
+        self.decimation = 4
+        self.episode_length_s = 10.0
+        # simulation settings
+        self.sim.dt = 0.005
+        self.sim.render_interval = self.decimation
+        self.sim.physics_material = self.scene.terrain.physics_material
+        self.sim.physx.gpu_max_rigid_patch_count = 10 * 2**15
+        # viewer settings
+        self.viewer.eye = (1.5, 1.5, 1.5)
+        self.viewer.origin_type = "asset_root"
+        self.viewer.asset_name = "robot"
+
 
 
 @configclass
