@@ -28,6 +28,7 @@ class G1SpeedParkourEnvCfg(SpeedParkourEnvCfg):
             "right_elbow_link",
             "right_wrist_yaw_link",
         ]
+        # self.commands.visualize = False
 
 @configclass
 class G1ParkourEnvCfg(CatParkourEnvCfg):

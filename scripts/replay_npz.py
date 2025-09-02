@@ -61,11 +61,12 @@ class ReplayMotionsSceneCfg(InteractiveSceneCfg):
     obstacle_box = AssetBaseCfg(
     prim_path="/World/Obstacles/box_01",
     spawn=sim_utils.CuboidCfg(
-        size=(0.6, 1, 0.4),
+        size=(0.6, 2, 0.4),
         rigid_props=sim_utils.RigidBodyPropertiesCfg(kinematic_enabled=True),
         collision_props=sim_utils.CollisionPropertiesCfg(),
     ),
     init_state=AssetBaseCfg.InitialStateCfg(   # ← 关键：用 AssetBaseCfg 自带的 InitialStateCfg
+        # pos=(-2.15, -0.5, 0.20),
         pos=(-1.5, -0.5, 0.20),
         rot=(1.0, 0.0, 0.0, 0.0),
         ),
