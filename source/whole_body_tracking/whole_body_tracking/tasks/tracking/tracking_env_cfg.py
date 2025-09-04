@@ -76,7 +76,10 @@ class SpeedParkourSceneCfg(InteractiveSceneCfg):
     obstacle_proto: RigidObjectCfg = RigidObjectCfg(
         prim_path="/World/envs/env_.*/Object_A",       # 注意加 {ENV_REGEX_NS}，每个 env 一份
         spawn=sim_utils.CuboidCfg(
-            size=(0.6, 2, 0.4),
+            # """ size_z = 0.35m"""
+            size=(0.6, 2, 0.35),
+            # """ size_z = 0.40m"""
+            # size=(0.6, 2, 0.40),
             rigid_props=sim_utils.RigidBodyPropertiesCfg(
                 kinematic_enabled=True,   # 运动学体：不被撞动，但能产生接触力
                 disable_gravity=True,     # 不受重力
@@ -138,7 +141,7 @@ class CatParkourSceneCfg(InteractiveSceneCfg):
     obstacle_proto: RigidObjectCfg = RigidObjectCfg(
         prim_path="/World/envs/env_.*/Object_A",       # 注意加 {ENV_REGEX_NS}，每个 env 一份
         spawn=sim_utils.CuboidCfg(
-            size=(0.6, 1, 0.4),
+            size=(0.7, 2, 0.35),
             rigid_props=sim_utils.RigidBodyPropertiesCfg(
                 kinematic_enabled=True,   # 运动学体：不被撞动，但能产生接触力
                 disable_gravity=True,     # 不受重力
@@ -154,7 +157,7 @@ class CatParkourSceneCfg(InteractiveSceneCfg):
             ),
         ),
         init_state=RigidObjectCfg.InitialStateCfg(
-            pos=(-1.5, -0.5, 0.20),  # 初始放地面上（z=半高）
+            pos=(-1.7, -0.5, 0.20),  # 初始放地面上（z=半高）
             rot=(1.0, 0.0, 0.0, 0.0),
             lin_vel=(0.0, 0.0, 0.0),
             ang_vel=(0.0, 0.0, 0.0),
@@ -382,17 +385,17 @@ class TerminationsCfg:
     time_out = DoneTerm(func=mdp.time_out, time_out=True)
     anchor_pos = DoneTerm(
         func=mdp.bad_anchor_pos_z_only,
-        params={"command_name": "motion", "threshold": 0.25},
+        params={"command_name": "motion", "threshold": 0.45},
     )
     anchor_ori = DoneTerm(
         func=mdp.bad_anchor_ori,
-        params={"asset_cfg": SceneEntityCfg("robot"), "command_name": "motion", "threshold": 0.8},
+        params={"asset_cfg": SceneEntityCfg("robot"), "command_name": "motion", "threshold": 1},
     )
     ee_body_pos = DoneTerm(
         func=mdp.bad_motion_body_pos_z_only,
         params={
             "command_name": "motion",
-            "threshold": 0.25,
+            "threshold": 0.45,
             "body_names": [
                 "left_ankle_roll_link",
                 "right_ankle_roll_link",
@@ -416,7 +419,7 @@ class CurriculumCfg:
 
 @configclass
 class SpeedParkourEnvCfg(ManagerBasedRLEnvCfg):
-    """Configuration for the locomotion cat-parkour environment."""
+    """Configuration for the locomotion Speed-parkour environment."""
 
     # Scene settings
     scene: SpeedParkourSceneCfg = SpeedParkourSceneCfg(num_envs=4096, env_spacing=2.5) 
@@ -434,6 +437,7 @@ class SpeedParkourEnvCfg(ManagerBasedRLEnvCfg):
         """Post initialization."""
         # general settings
         self.decimation = 4
+        # 调整episode长度为40s
         self.episode_length_s = 10.0
         # simulation settings
         self.sim.dt = 0.005

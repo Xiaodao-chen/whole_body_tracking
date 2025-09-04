@@ -30,7 +30,7 @@ class G1SpeedParkourEnvCfg(SpeedParkourEnvCfg):
         ]
 
 @configclass
-class G1ParkourEnvCfg(CatParkourEnvCfg):
+class G1CatParkourEnvCfg(CatParkourEnvCfg):
     def __post_init__(self):
         super().__post_init__()
 
